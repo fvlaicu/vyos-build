@@ -6,6 +6,3 @@ vyos-xe-guest-utilities
 vyos-1x-vmware
 vyos-linux-firmware
 vyos-intel-qat
-wireguard-modules
-vyos-drivers-intel-ice
-vyos-drivers-realtek-r8152
