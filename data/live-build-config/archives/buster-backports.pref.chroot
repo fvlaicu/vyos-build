@@ -54,6 +54,10 @@ Package: libqmi-proxy
 Pin: release n=buster-backports
 Pin-Priority: 600
 
+Package: open-vm-tools
+Pin: release n=buster-backports
+Pin-Priority: 600
+
 Package: *
 Pin: release n=buster-backports
 Pin-Priority: -10
