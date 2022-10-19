@@ -25,8 +25,8 @@ fi
 . ${KERNEL_VAR_FILE}
 
 result=()
-# Retrieve firmware blobs from source files
-FW_FILES=$(find ${LINUX_SRC}/debian/tmp/lib/modules/${KERNEL_VERSION}${KERNEL_SUFFIX}/kernel/drivers/net -name *.ko | xargs modinfo | grep "^firmware:" | awk '{print $2}')
+# Retrieve firmware blobs from source files linux/debian/linux-image
+FW_FILES=$(find ${LINUX_SRC}/debian/linux-image/lib/modules/${KERNEL_VERSION}${KERNEL_SUFFIX}/kernel/drivers/net -name *.ko | xargs modinfo | grep "^firmware:" | awk '{print $2}')
 
 # Debian package will use the descriptive Git commit as version
 GIT_COMMIT=$(cd ${CWD}/${LINUX_FIRMWARE}; git describe --always)
