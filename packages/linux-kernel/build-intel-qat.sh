@@ -2,6 +2,11 @@
 CWD=$(pwd)
 KERNEL_VAR_FILE=${CWD}/kernel-vars
 
+if ! dpkg-architecture -iamd64; then
+    echo "Intel-QAT is only buildable on amd64 platforms"
+    exit 0
+fi
+
 if [ ! -f ${KERNEL_VAR_FILE} ]; then
     echo "Kernel variable file '${KERNEL_VAR_FILE}' does not exist, run ./build_kernel.sh first"
     exit 1
@@ -10,7 +15,7 @@ fi
 . ${KERNEL_VAR_FILE}
 
 declare -a intel=(
-    "https://01.org/sites/default/files/downloads/qat1.7.l.4.9.0-00008.tar_0.gz"
+    "http://dev.packages.vyos.net/source-mirror/QAT1.7.L.4.16.0-00017.tar.gz"
 )
 
 for url in "${intel[@]}"
@@ -19,7 +24,7 @@ do
 
     DRIVER_FILE=$(basename ${url} | sed -e s/tar_0/tar/)
     DRIVER_DIR="${DRIVER_FILE%.tar.gz}"
-    DRIVER_NAME="qat"
+    DRIVER_NAME="QAT"
     DRIVER_VERSION=$(echo ${DRIVER_DIR} | awk -F${DRIVER_NAME} '{print $2}')
     DRIVER_VERSION_EXTRA="-0"
 
@@ -52,20 +57,24 @@ do
     fi
 
     echo "I: Compile Kernel module for Intel ${DRIVER_NAME} driver"
-    mkdir -p ${DEBIAN_DIR}/lib/firmware ${DEBIAN_DIR}/usr/local/bin ${DEBIAN_DIR}/usr/lib/x86_64-linux-gnu ${DEBIAN_DIR}/etc/init.d
+    mkdir -p \
+        ${DEBIAN_DIR}/lib/firmware \
+        ${DEBIAN_DIR}/usr/sbin \
+        ${DEBIAN_DIR}/usr/lib/x86_64-linux-gnu \
+        ${DEBIAN_DIR}/etc/init.d
     KERNEL_SOURCE_ROOT=${KERNEL_DIR} ./configure --enable-kapi --enable-qat-lkcf
     make -j $(getconf _NPROCESSORS_ONLN) all
     make INSTALL_MOD_PATH=${DEBIAN_DIR} INSTALL_FW_PATH=${DEBIAN_DIR} \
-        qat-driver-install
+        qat-driver-install adf-ctl-all
 
     if [ "x$?" != "x0" ]; then
         exit 1
     fi
 
-    cp build/*.bin ${DEBIAN_DIR}/lib/firmware
+    cp quickassist/qat/fw/*.bin ${DEBIAN_DIR}/lib/firmware
     cp build/*.so ${DEBIAN_DIR}/usr/lib/x86_64-linux-gnu
-    cp build/qat_service ${DEBIAN_DIR}/etc/init.d
-    cp build/adf_ctl ${DEBIAN_DIR}/usr/local/bin
+    cp build/adf_ctl ${DEBIAN_DIR}/usr/sbin
+    cp quickassist/build_system/build_files/qat_service ${DEBIAN_DIR}/etc/init.d
     cp build/usdm_drv.ko ${DEBIAN_DIR}/lib/modules/${KERNEL_VERSION}${KERNEL_SUFFIX}/updates/drivers
     chmod 644 ${DEBIAN_DIR}/lib/firmware/*
     chmod 755 ${DEBIAN_DIR}/etc/init.d/* ${DEBIAN_DIR}/usr/local/bin/*

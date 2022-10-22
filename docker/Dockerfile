@@ -604,6 +604,12 @@ RUN apt-get update && apt-get install -y \
 RUN gem install public_suffix -v 4.0.7
 RUN gem install --no-document fpm
 
+# Packages needed to build kernel 5.10
+RUN apt-get update && apt-get install -y \
+      python-dev \
+      pciutils \
+      yasm
+
 # Allow password-less 'sudo' for all users in group 'sudo'
 RUN sed "s/^%sudo.*/%sudo\tALL=(ALL) NOPASSWD:ALL/g" -i /etc/sudoers && \
     chmod a+s /usr/sbin/useradd /usr/sbin/groupadd /usr/sbin/gosu /usr/sbin/usermod
