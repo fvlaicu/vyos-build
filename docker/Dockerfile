@@ -655,6 +655,12 @@ RUN apt-get update && apt-get install -y \
       debmake \
       python3-debian
 
+# Packages needed to build kernel 5.10
+RUN apt-get update && apt-get install -y \
+      python-dev \
+      pciutils \
+      yasm
+
 # Allow password-less 'sudo' for all users in group 'sudo'
 RUN echo -e "vyos_bld\tALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/vyos_bld && \
     chmod a+s /usr/sbin/useradd /usr/sbin/groupadd
